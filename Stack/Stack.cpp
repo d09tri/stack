@@ -97,18 +97,91 @@ bool areBracketsBalanced(Stack& stack, char str[], int n)
 	}
 }
 
+int findPriority(char c)
+{
+	if (c == '+' || c == '-')
+		return 1;
+	if (c == '*' || c == '/')
+		return 2;
+	if (c == '^')
+		return 3;
+	return 0;
+}
+
+char sTemp[100];
+
+void infixToPostfix(Stack &stack, char s[], int n)
+{
+	initStack(stack);
+	int j = 0;
+	char c;
+	for (int i = 0; i < n; i++)
+	{
+		if (s[i] >= '0' && s[i] <= '9' || s[i] >= 'a' && s[i] <= 'z' || s[i] >= 'A' && s[i] <= 'Z')
+		{
+			sTemp[j] = s[i];
+			j++;
+		}
+		else if (s[i] == '(')
+			push(stack, s[i]);
+		else if (s[i] == '+' || s[i] == '-' || s[i] == '*' || s[i] == '^' || s[i] == '*')
+		{
+			if (isEmpty(stack))
+				push(stack, s[i]);
+			else if (findPriority(stack.top->data) >= findPriority(s[i]))
+			{
+				c = pop(stack, c);
+				sTemp[j] = c;
+				j++;
+				push(stack, s[i]);
+			}
+			else
+				push(stack, s[i]);
+		}
+		else if (s[i] == ')')
+		{
+			while (!isEmpty(stack) && stack.top->data != '(')
+			{
+				c = pop(stack, c);
+				sTemp[j] = c;
+				j++;
+			}
+		}
+	}
+	while (!isEmpty(stack))
+	{
+		c = pop(stack, c);
+		if (c == '(' || c == ')')
+			continue;
+		else
+		{
+			sTemp[j] = c;
+			j++;
+		}
+	}
+}
+
 void main()
 {
 	Stack stack;
 	char str[100];
-	printf("Input brackets here: ");
+	printf("Input brackets/infix here: ");
 	scanf("%s", &str);
 	int n = strlen(str);
 
-	if (areBracketsBalanced(stack, str, n))
-		printf("Balanced\n");
-	else
-		printf("Unbalanced\n");
+	infixToPostfix(stack, str, n);
+	for (int i = 0; i < strlen(sTemp); i++)
+	{
+		printf("%c", sTemp[i]);
+	}
 
+	/*
+	if (areBracketsBalanced(stack, str, n))
+		printf("Balanced");
+	else
+		printf("Unbalanced");
+	*/
+
+	printf("\n");
 	system("pause");
 }
